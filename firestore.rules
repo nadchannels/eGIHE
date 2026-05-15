@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Branches
+    match /branches/{id} { 
+      allow read: if true; 
+      allow write: if request.auth != null; 
+    }
+    
+    // Faculties
+    match /faculties/{id} { 
+      allow read: if true; 
+      allow write: if request.auth != null; 
+    }
+    
+    // Timetable
+    match /timetable/{id} { 
+      allow read: if true; 
+      allow write: if request.auth != null; 
+    }
+    
+    // Announcements
+    match /announcements/{id} { 
+      allow read: if true; 
+      allow write: if request.auth != null; 
+    }
+    
+    // Comments
+    match /comments/{id} { 
+      allow create: if true; 
+      allow read, update, delete: if request.auth != null; 
+    }
+    
+    // Users
+    match /users/{id} { 
+      // Anyone can read (so users can see trainers)
+      allow read: if true; 
+      // Authenticated users can write (they need to write their own doc on signup, and superadmins need to update roles)
+      allow write: if request.auth != null; 
+    }
+    
+    // Default rule to catch anything else temporarily during dev
+    match /{document=**} { 
+      allow read, write: if request.auth != null; 
+    }
+  }
+}
