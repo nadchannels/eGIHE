@@ -540,17 +540,27 @@ textarea.input-control {
   margin-bottom: 0.1rem;
 }
 
-.timetable-session .delete-btn {
+.timetable-session .delete-btn,
+.timetable-session .edit-btn {
   position: absolute;
   top: 4px;
-  right: 4px;
-  color: var(--color-danger);
   background: var(--color-white);
   border-radius: 50%;
   padding: 2px;
   display: none;
 }
 
-.timetable-session:hover .delete-btn {
+.timetable-session .delete-btn {
+  right: 4px;
+  color: var(--color-danger);
+}
+
+.timetable-session .edit-btn {
+  right: 28px;
+  color: var(--color-accent);
+}
+
+.timetable-session:hover .delete-btn,
+.timetable-session:hover .edit-btn {
   display: flex;
 }
