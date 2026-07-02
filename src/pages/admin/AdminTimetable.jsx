@@ -356,7 +356,18 @@ export default function AdminTimetable() {
                     <div
                       key={session.id}
                       className="timetable-session"
-                      style={{ gridRow: `${rowStart} / ${rowEnd}`, gridColumn: col }}
+                      style={{ 
+                        gridRow: `${rowStart} / ${rowEnd}`, 
+                        gridColumn: col,
+                        cursor: isSuperAdmin ? 'pointer' : 'default'
+                      }}
+                      onClick={(e) => { 
+                        if (isSuperAdmin) {
+                          e.stopPropagation(); 
+                          openEditModal(session); 
+                        }
+                      }}
+                      title={isSuperAdmin ? "Click to Edit" : ""}
                     >
                       <h4>{session.subject}</h4>
                       <p>{session.startTime} - {session.endTime}</p>
