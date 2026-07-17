@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Calendar, Users, Megaphone, MessageSquare, Building2, LogOut, Menu, X } from 'lucide-react';
+import { Home, Calendar, Users, Megaphone, MessageSquare, Building2, LogOut, Menu, X, ClipboardList } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
@@ -21,6 +21,7 @@ export default function AdminLayout() {
   const navItems = [
     { name: 'Dashboard', path: '/admin', icon: Home, show: true },
     { name: 'Timetable', path: '/admin/timetable', icon: Calendar, show: true },
+    { name: 'Attendance', path: '/admin/attendance', icon: ClipboardList, show: true },
     { name: 'Users Manager', path: '/admin/users', icon: Users, show: isSuperAdmin },
     { name: 'Announcements', path: '/admin/announcements', icon: Megaphone, show: isSuperAdmin },
     { name: 'Comments', path: '/admin/comments', icon: MessageSquare, show: isSuperAdmin },

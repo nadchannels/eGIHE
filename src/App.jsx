@@ -18,6 +18,7 @@ import LoginRegister from './pages/admin/LoginRegister';
 import ApprovalPending from './pages/admin/ApprovalPending';
 import Dashboard from './pages/admin/Dashboard';
 import AdminTimetable from './pages/admin/AdminTimetable';
+import Attendance from './pages/admin/Attendance';
 import UsersManager from './pages/admin/UsersManager';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import CommentsManager from './pages/admin/CommentsManager';
@@ -49,6 +50,7 @@ function App() {
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="timetable" element={<AdminTimetable />} />
+          <Route path="attendance" element={<Attendance />} />
           <Route path="users" element={<ProtectedRoute requireSuperAdmin><UsersManager /></ProtectedRoute>} />
           <Route path="announcements" element={<ProtectedRoute requireSuperAdmin><AdminAnnouncements /></ProtectedRoute>} />
           <Route path="comments" element={<ProtectedRoute requireSuperAdmin><CommentsManager /></ProtectedRoute>} />
