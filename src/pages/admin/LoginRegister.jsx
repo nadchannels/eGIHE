@@ -7,7 +7,7 @@ import {
   sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, setDoc, getDocs, collection, query, where, limit } from 'firebase/firestore';
-import { Eye, EyeOff, ArrowLeft, Mail, KeyRound } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, Building2 } from 'lucide-react';
 
 export default function LoginRegister() {
   // ─── Mode state ───────────────────────────────────────────────────────────
@@ -17,6 +17,7 @@ export default function LoginRegister() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [faculties, setFaculties] = useState([]);
+  const [branches, setBranches] = useState([]);
   const navigate = useNavigate();
 
   // ─── Password visibility toggles ─────────────────────────────────────────
@@ -32,7 +33,9 @@ export default function LoginRegister() {
     password: '',
     confirmPassword: '',
     selectedFaculties: [],
-    personalEmail: ''
+    selectedBranch: '',
+    personalEmail: '',
+    role: 'trainer'
   });
 
   // ─── Forgot-password form ─────────────────────────────────────────────────
@@ -46,11 +49,15 @@ export default function LoginRegister() {
 
   // ─────────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    const fetchFaculties = async () => {
-      const snapshot = await getDocs(collection(db, 'faculties'));
-      setFaculties(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    const fetchData = async () => {
+      const [fSnap, bSnap] = await Promise.all([
+        getDocs(collection(db, 'faculties')),
+        getDocs(collection(db, 'branches'))
+      ]);
+      setFaculties(fSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setBranches(bSnap.docs.map(d => ({ id: d.id, ...d.data() })));
     };
-    fetchFaculties();
+    fetchData();
   }, []);
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -107,21 +114,29 @@ export default function LoginRegister() {
         );
         const user = userCredential.user;
 
-        const role = generatedEmail === 'egihemanager@ksp.rw' ? 'superadmin' : 'trainer';
+        const role = generatedEmail === 'egihemanager@ksp.rw' ? 'superadmin' : formData.role;
         const status = generatedEmail === 'egihemanager@ksp.rw' ? 'approved' : 'pending';
 
-        await setDoc(doc(db, 'users', user.uid), {
+        const userRecord = {
           firstName: formData.firstName,
           lastName: formData.lastName,
           middleName: formData.middleName,
           username: formData.username,
           email: generatedEmail,
           personalEmail: formData.personalEmail,
-          faculties: formData.selectedFaculties,
           role,
           status,
           createdAt: new Date().toISOString()
-        });
+        };
+
+        // Attach role-specific fields
+        if (role === 'branch_manager') {
+          userRecord.branch = formData.selectedBranch;
+        } else {
+          userRecord.faculties = formData.selectedFaculties;
+        }
+
+        await setDoc(doc(db, 'users', user.uid), userRecord);
 
         if (status === 'approved') {
           navigate('/admin');
@@ -276,7 +291,7 @@ export default function LoginRegister() {
               Join eGIHE
             </h2>
             <p style={{ textAlign: 'center', color: 'var(--color-text-secondary)', marginBottom: '2rem' }}>
-              Register to become a Trainer
+              {formData.role === 'branch_manager' ? 'Register as a Branch Manager' : 'Register to become a Trainer'}
             </p>
 
             {error && (
@@ -333,22 +348,60 @@ export default function LoginRegister() {
                 />
               </div>
 
+              {/* Role Selector */}
               <div className="input-group">
-                <label>Faculties <span style={{ color: 'var(--color-text-secondary)', fontWeight: 400 }}>(Hold Ctrl/Cmd to select multiple)</span></label>
+                <label>Role</label>
                 <select
-                  name="selectedFaculties"
+                  name="role"
                   className="input-control"
-                  multiple
-                  required
-                  value={formData.selectedFaculties}
+                  value={formData.role}
                   onChange={handleChange}
-                  style={{ height: '100px' }}
                 >
-                  {faculties.map(f => (
-                    <option key={f.id} value={f.id}>{f.name}</option>
-                  ))}
+                  <option value="trainer">Trainer</option>
+                  <option value="branch_manager">Branch Manager</option>
                 </select>
               </div>
+
+              {/* Faculty selector — only for trainers */}
+              {formData.role === 'trainer' && (
+                <div className="input-group">
+                  <label>Faculties <span style={{ color: 'var(--color-text-secondary)', fontWeight: 400 }}>(Hold Ctrl/Cmd to select multiple)</span></label>
+                  <select
+                    name="selectedFaculties"
+                    className="input-control"
+                    multiple
+                    required
+                    value={formData.selectedFaculties}
+                    onChange={handleChange}
+                    style={{ height: '100px' }}
+                  >
+                    {faculties.map(f => (
+                      <option key={f.id} value={f.id}>{f.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Branch selector — only for branch managers */}
+              {formData.role === 'branch_manager' && (
+                <div className="input-group">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Building2 size={14} /> Assigned Branch
+                  </label>
+                  <select
+                    name="selectedBranch"
+                    className="input-control"
+                    required
+                    value={formData.selectedBranch}
+                    onChange={handleChange}
+                  >
+                    <option value="">— Select Branch —</option>
+                    {branches.map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="input-group" style={{ position: 'relative' }}>
                 <label>Password</label>
@@ -480,6 +533,7 @@ export default function LoginRegister() {
                   required
                 >
                   <option value="trainer">Trainer</option>
+                  <option value="branch_manager">Branch Manager</option>
                   <option value="superadmin">Super Admin</option>
                 </select>
               </div>
