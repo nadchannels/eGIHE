@@ -22,6 +22,7 @@ const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat
 const SPECIAL_TRAINER_OPTIONS = [
   { value: 'PERSONAL_PROJECT', label: '📁 Personal Project' },
   { value: 'SELF_STUDY',       label: '📖 Self Study' },
+  { value: 'ONLINE',       label: '📖 Online class' },
 ];
 
 const getRowFromTime = (time) => {
